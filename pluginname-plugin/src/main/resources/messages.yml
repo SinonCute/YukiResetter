@@ -1,0 +1,5 @@
+error-unknown: '&cLỗi không xác định.'
+
+update-available: '%PREFIX% &aĐã có phiên bản mới: &e%NEW_VERSION% &a(phiên bản hiện tại &e%CURRENT_VERSION%&a).'
+update-available-link: '&aTải về tại: &e%URL%'
+update-latest: '%PREFIX% &aBạn đang sử dụng phiên bản mới nhất.'

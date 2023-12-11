@@ -1,0 +1,27 @@
+# Tên giao diện nạp thẻ
+name: "&e&lExample menu"
+# Số hàng của giao diện (tối đa 6)
+rows: 3
+
+# Tô nền cho Menu
+# Nền sẽ được fill trước tiên, các button khác sẽ được đặt lên nền
+background:
+  icon:
+    type: STAINED_GLASS_PANE
+    data: 15 # black
+  # với button fill, số hàng phải bằng số hàng của giao diện (rows), số cột phải là 9
+  # các vị trí đánh dấu bằng 'x' sẽ được fill
+  fill:
+    - 'xxxxxxxxx'
+    - 'xxxxxxxxx'
+    - 'xxxxxxxxx'
+
+# Button: Đóng Menu
+close:
+  icon:
+    type: BARRIER
+    data: 0
+  name: "&c&lĐóng lại"
+  lore:
+    - "&7Nhấn để đóng lại"
+  slot: 2

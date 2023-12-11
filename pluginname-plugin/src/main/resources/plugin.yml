@@ -1,0 +1,8 @@
+name: PluginName #TODO: Đổi tên plugin
+version: '${version}'
+main: net.minevn.pluginname.PluginMainClass #TODO: Đổi tên package
+description: A Minecraft plugin
+depend: [ MineVNLib ]
+commands:
+  pluginname:
+    permission: pluginname.admin
