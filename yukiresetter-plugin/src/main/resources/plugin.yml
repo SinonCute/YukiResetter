@@ -1,0 +1,8 @@
+name: YukiResetter
+version: '${version}'
+main: net.minevn.yukiresetter.YukiResetter
+description: A Minecraft plugin
+depend: [ MineVNLib, 'Multiverse-Core' ]
+commands:
+  yukiresetter:
+    permission: yukiresetter.admin

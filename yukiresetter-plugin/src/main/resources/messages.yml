@@ -1,0 +1,9 @@
+error-unknown: '&cLỗi không xác định.'
+
+reset-chat-message: '&eĐang reset thế giới &b%WORLD%...'
+reset-complete-chat-message: '&eThế giới &b%WORLD% &eđã được reset.'
+warning-chat-message: '&eTrong %TIME% giây nữa, thế giới &b%WORLD% &esẽ được reset.'
+warning-title: '&c&lCảnh báo'
+warning-subtitle: '&eReset trong %TIME% giây'
+
+teleportingMessage: '&eĐang di chuyển bạn đến vị trí an toàn...'

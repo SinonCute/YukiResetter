@@ -1,0 +1,25 @@
+prefix: '&b&lYukiResetter &8» &r'
+
+database:
+  # Loại cơ sở dữ liệu
+  # Các engine hỗ trợ: h2, mysql, mariadb
+  # mặc định là h2 (lưu vào 1 file)
+  engine: h2
+  h2:
+    file: 'yukiresetter' # Tên file cơ sở dữ liệu
+  mysql:
+    host: localhost
+    port: 3306
+    user: 'root'
+    password: '123'
+    database: 'yukiresetter'
+
+server-id: earth-spawn
+
+notifications:
+  warning_times: [300, 60, 15]  # Seconds before reset to send notifications
+world-resets:
+  - world-display-name: 'world_nether'  # Display name of the world
+    world-name: 'world_nether' # Name of the world
+    world-border-size: '1000' # World border size
+    reset-interval: '10080' # Reset interval in minutes (1 day = 1440) (1 week = 10080)
