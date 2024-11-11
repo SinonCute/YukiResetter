@@ -9,7 +9,6 @@ import net.minevn.yukiresetter.utils.info
 import net.minevn.yukiresetter.utils.runAsyncTimer
 import net.minevn.yukiresetter.utils.warning
 import org.bukkit.Bukkit
-import java.util.UUID
 
 object ResetManager {
     private lateinit var plugin : YukiResetter
@@ -42,7 +41,7 @@ object ResetManager {
             if (schedule == null) {
                 warning("schedule for world ${worldReset.worldName} not found, creating new schedule")
                 val newSchedule = ResetSchedule(
-                    UUID.randomUUID().toString(),
+                    worldReset.id,
                     plugin.config.serverId,
                     worldReset.worldDisplayName,
                     worldReset.worldName,
@@ -68,7 +67,9 @@ object ResetManager {
         resetSchedules = datbase.getAllSchedules()
     }
 
-    fun getResetSchedule(worldName: String) = resetSchedules.find { it.worldName == worldName }
+    fun getResetScheduleById(id: String) = resetSchedules.find { it.id == id }
+
+    fun getResetScheduleByWorldName(worldName: String) = resetSchedules.find { it.worldName == worldName }
 
     fun setResetSchedule(schedule: ResetSchedule) {
         datbase.setSchedule(schedule)
@@ -87,8 +88,8 @@ object ResetManager {
                 it.nextReset - System.currentTimeMillis() < plugin.config.warningTimes.first() * 1000
     }
 
-    fun startReset(worldName: String, force: Boolean = false) : Boolean {
-        val schedule = resetSchedules.find { it.worldName == worldName } ?: return false
+    fun startReset(id: String, force: Boolean = false) : Boolean {
+        val schedule = getResetScheduleById(id) ?: return false
         if (runningTasks.containsKey(schedule.id)) return false
         if (plugin.server.getWorld(schedule.worldName) == null) return false
 
@@ -102,11 +103,14 @@ object ResetManager {
         val task = runningTasks[id] ?: return
         task.cancel()
         runningTasks.remove(id)
+        val schedule = getResetScheduleById(id) ?: return
+        schedule.nextReset = System.currentTimeMillis() + (schedule.resetInterval * 1000 * 60)
+        setResetSchedule(schedule)
     }
 
     fun finishReset(id: String) {
         runningTasks.remove(id)
     }
 
-    fun isResetting(worldName: String) = runningTasks.any { it.value.schedule.worldName == worldName }
+    fun isResetting(id: String) = runningTasks.containsKey(id)
 }

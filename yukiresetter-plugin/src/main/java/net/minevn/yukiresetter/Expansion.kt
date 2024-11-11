@@ -24,7 +24,7 @@ class Expansion : PlaceholderExpansion() {
     override fun onPlaceholderRequest(player: Player, identifier: String): String {
         if (identifier.startsWith("reset_schedule_")) {
             val id = identifier.substringAfter("reset_schedule_").substringBeforeLast("_")
-            val schedule = ResetManager.getResetSchedule(id) ?: return "Not found"
+            val schedule = ResetManager.getResetScheduleById(id) ?: return "Not found"
 
             val timeLeft = schedule.nextReset - System.currentTimeMillis()
 
