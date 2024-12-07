@@ -40,6 +40,8 @@ class Expansion : PlaceholderExpansion() {
                 "h" -> hours.toString()
                 "m" -> minutes.toString()
                 "s" -> seconds.toString()
+                "minimal" -> "$days ngày $hours giờ $minutes phút"
+                "all" -> "$days ngày $hours giờ $minutes phút $seconds giây"
                 else -> "Invalid identifier"
             }
         }

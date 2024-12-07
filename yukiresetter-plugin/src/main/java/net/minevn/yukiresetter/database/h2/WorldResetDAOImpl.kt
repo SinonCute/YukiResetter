@@ -1,8 +1,8 @@
-package net.minevn.yukiresetter.database.mysql
+package net.minevn.yukiresetter.database.h2
 
-import net.minevn.yukiresetter.database.WorldResetScheduleDAO
+import net.minevn.yukiresetter.database.WorldResetDAO
 
-class WorldResetScheduleDAOImpl : WorldResetScheduleDAO() {
+class WorldResetDAOImpl : WorldResetDAO() {
     override fun isTableExistsScript(): String {
         return "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '$tableName' and TABLE_SCHEMA = 'PUBLIC'"
     }
@@ -14,6 +14,7 @@ class WorldResetScheduleDAOImpl : WorldResetScheduleDAO() {
             "serverId" VARCHAR(36) NOT NULL,
             "worldDisplayName" VARCHAR(255) NOT NULL,
             "worldName" VARCHAR(255) NOT NULL,
+            "worldBorderSize" DOUBLE NOT NULL,
             "resetInterval" BIGINT NOT NULL,
             "lastReset" BIGINT NOT NULL,
             "nextReset" BIGINT NOT NULL,
@@ -31,8 +32,14 @@ class WorldResetScheduleDAOImpl : WorldResetScheduleDAO() {
     }
 
     override fun setScript(): String {
-        return """MERGE INTO "$tableName"("id", "serverId", "worldDisplayName", "worldName", "resetInterval", "lastReset", "nextReset") KEY("id") VALUES(?, ?, ?, ?, ?, ?, ?)"""
+        return """
+        MERGE INTO "$tableName" (
+            "id", "serverId", "worldDisplayName", "worldName", "worldBorderSize", "resetInterval", "lastReset", "nextReset"
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """
     }
+
 
     override fun deleteScript(): String {
         return """DELETE FROM "$tableName" WHERE "id" = ?"""
@@ -40,6 +47,6 @@ class WorldResetScheduleDAOImpl : WorldResetScheduleDAO() {
 
     override fun deleteScriptIfNotExists(worldNamesCount: Int): String {
         val placeholders = List(worldNamesCount) { "?" }.joinToString(", ")
-        return """DELETE FROM "yukiresetter_world_reset_schedule" WHERE "serverId" = ? AND "worldName" NOT IN ($placeholders)"""
+        return """DELETE FROM "$tableName" WHERE "serverId" = ? AND "worldName" NOT IN ($placeholders)"""
     }
 }

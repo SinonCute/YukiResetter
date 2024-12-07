@@ -5,11 +5,12 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.title.Title
 import net.minevn.libs.bukkit.color
 import net.minevn.yukiresetter.YukiResetter
-import net.minevn.yukiresetter.`object`.WorldReset
+import net.minevn.yukiresetter.manager.ResetManager
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import java.time.Duration
 import java.util.logging.Level
+import java.util.regex.Pattern
 
 private val main = YukiResetter.instance
 
@@ -73,25 +74,22 @@ fun sendTitle(target: Audience, title: String, subtitle: String, fadeIn: Int, st
 }
 
 fun convertHumanReadableTimeToMinutes(time: String): Int {
-    val time = time.split(" ")
-    return when (time.size) {
-        1 -> {
-            time[0].toInt()
+    val regex = Pattern.compile("(\\d+)([^0-9 ])")
+    val result = regex.matcher(time)
+    if (result.find()) {
+        val timeS = result.group(1)
+        val unit = result.group(2)
+        return when (unit) {
+            "s" -> timeS.toInt()
+            "m" -> timeS.toInt()
+            "h" -> timeS.toInt() * 60
+            "d" -> timeS.toInt() * 60 * 24
+            "w" -> timeS.toInt() * 60 * 24 * 7
+            "y" -> timeS.toInt() * 60 * 24 * 365
+            else -> 0
         }
-        2 -> {
-            val minutes = time[0].toInt()
-            val unit = time[1]
-            when (unit) {
-                "s" -> minutes
-                "m" -> minutes
-                "h" -> minutes * 60
-                "d" -> minutes * 60 * 24
-                "w" -> minutes * 60 * 24 * 7
-                "y" -> minutes * 60 * 24 * 365
-                else -> 0
-            }
-        }
-        else -> 0
+    } else {
+        return 0
     }
 }
 
@@ -108,7 +106,7 @@ fun resetWorld(worldName: String) {
     if (!worldManager.addWorld(worldName, worldEnvironment, null, worldType, true, null, true)) {
         warning("Failed to add world $worldName")
     }
-    val worldReset = main.config.worldResets.find { it.worldName == worldName } ?: return
+    val worldReset = ResetManager.getResetScheduleByWorldName(worldName) ?: return
     if (worldReset.worldBorderSize > 0) {
         val world = Bukkit.getWorld(worldReset.worldName)
         world?.worldBorder?.size = worldReset.worldBorderSize

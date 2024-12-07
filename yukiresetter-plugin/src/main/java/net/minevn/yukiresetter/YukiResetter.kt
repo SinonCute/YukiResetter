@@ -5,6 +5,7 @@ import net.minevn.libs.bukkit.MineVNPlugin
 import net.minevn.yukiresetter.commands.AdminCmd
 import net.minevn.yukiresetter.config.Language
 import net.minevn.yukiresetter.config.MainConfig
+import net.minevn.yukiresetter.listener.PlayerListener
 import net.minevn.yukiresetter.manager.ResetManager
 
 class YukiResetter : MineVNPlugin() {
@@ -16,6 +17,7 @@ class YukiResetter : MineVNPlugin() {
     override fun onEnable() {
         instance = this
         multiverseCore = server.pluginManager.getPlugin("Multiverse-Core") as MultiverseCore
+        server.pluginManager.registerEvents(PlayerListener(), this)
 
         reload()
         AdminCmd.init()

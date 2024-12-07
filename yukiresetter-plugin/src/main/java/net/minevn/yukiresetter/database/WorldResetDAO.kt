@@ -2,13 +2,13 @@ package net.minevn.yukiresetter.database
 
 import net.minevn.libs.db.DataAccess
 import net.minevn.yukiresetter.YukiResetter
-import net.minevn.yukiresetter.`object`.ResetSchedule
+import net.minevn.yukiresetter.`object`.WorldReset
 
-abstract class WorldResetScheduleDAO : DataAccess() {
-    val tableName = "${YukiResetter.instance.config.tablePrefix}world_reset_schedule"
+abstract class WorldResetDAO : DataAccess() {
+    val tableName = "${YukiResetter.instance.config.tablePrefix}world_resets"
 
     companion object {
-        fun getInstance() = YukiResetter.instance.getDAO(WorldResetScheduleDAO::class)
+        fun getInstance() = YukiResetter.instance.getDAO(WorldResetDAO::class)
     }
 
     // region scripts
@@ -44,26 +44,42 @@ abstract class WorldResetScheduleDAO : DataAccess() {
                 val serverId = getString("serverId")
                 val worldDisplayName = getString("worldDisplayName")
                 val worldName = getString("worldName")
+                val worldBorderSize = getDouble("worldBorderSize")
                 val resetInterval = getLong("resetInterval")
                 val lastReset = getLong("lastReset")
                 val nextReset = getLong("nextReset")
-                ResetSchedule(id, serverId, worldDisplayName, worldName, resetInterval, lastReset, nextReset)
+                WorldReset(id, serverId, worldDisplayName, worldName, worldBorderSize, resetInterval, lastReset, nextReset)
             } else null
         }
     }
 
-    fun setSchedule(schedule: ResetSchedule): Int? {
-        val i = if (!isTableExists()) null else setScript().statement {
-            setString(1, schedule.id)
-            setString(2, schedule.serverId)
-            setString(3, schedule.worldDisplayName)
-            setString(4, schedule.worldName)
-            setLong(5, schedule.resetInterval)
-            setLong(6, schedule.lastReset)
-            setLong(7, schedule.nextReset)
-            executeUpdate()
+    fun setSchedule(schedule: WorldReset): Boolean {
+        println("Setting schedule for world: ${schedule.worldName}")
+
+        // Check if the table exists
+        if (!isTableExists()) {
+            println("Table does not exist. Aborting schedule update.")
+            return false
         }
-        return i
+
+        return try {
+            val rowsUpdated = setScript().statement {
+                setString(1, schedule.id)
+                setString(2, schedule.serverId)
+                setString(3, schedule.worldDisplayName)
+                setString(4, schedule.worldName)
+                setDouble(5, schedule.worldBorderSize)
+                setLong(6, schedule.resetInterval)
+                setLong(7, schedule.lastReset)
+                setLong(8, schedule.nextReset)
+                executeUpdate()
+            }
+            println("Schedule set result: ${rowsUpdated > 0}")
+            rowsUpdated > 0 // Return true if at least one row was updated/inserted
+        } catch (e: Exception) {
+            println("Error setting schedule: ${e.message}")
+            false // Return false on error
+        }
     }
 
     fun deleteSchedule(id: String) = deleteScript().statement {
@@ -81,16 +97,17 @@ abstract class WorldResetScheduleDAO : DataAccess() {
 
     fun getAllSchedules() = if (!isTableExists()) emptyList() else getScriptAll().statement {
         fetch {
-            val schedules = mutableListOf<ResetSchedule>()
+            val schedules = mutableListOf<WorldReset>()
             while (next()) {
                 val id = getString("id")
                 val serverId = getString("serverId")
                 val worldDisplayName = getString("worldDisplayName")
                 val worldName = getString("worldName")
+                val worldBorderSize = getDouble("worldBorderSize")
                 val resetInterval = getLong("resetInterval")
                 val lastReset = getLong("lastReset")
                 val nextReset = getLong("nextReset")
-                schedules.add(ResetSchedule(id, serverId, worldDisplayName, worldName, resetInterval, lastReset, nextReset))
+                schedules.add(WorldReset(id, serverId, worldDisplayName, worldName, worldBorderSize, resetInterval, lastReset, nextReset))
             }
             schedules
         }

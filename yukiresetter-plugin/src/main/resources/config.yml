@@ -18,9 +18,3 @@ server-id: earth-spawn
 
 notifications:
   warning_times: [300, 60, 15]  # Seconds before reset to send notifications
-world-resets:
-  - id: 'earth'  # Unique ID of the world
-    world-display-name: '&c&lEarth Map'  # Display name of the world
-    world-name: 'world' # Name of the world
-    world-border-size: '1000' # World border size (diameter)
-    reset-interval: '10080' # Reset interval in minutes (1 day = 1440) (1 week = 10080)

@@ -3,9 +3,11 @@ package net.minevn.yukiresetter.commands
 import net.minevn.libs.bukkit.command
 import net.minevn.yukiresetter.YukiResetter
 import net.minevn.yukiresetter.manager.ResetManager
+import net.minevn.yukiresetter.`object`.WorldReset
 import net.minevn.yukiresetter.utils.convertHumanReadableTimeToMinutes
 import net.minevn.yukiresetter.utils.send
 import org.bukkit.Bukkit
+import java.util.UUID
 
 class AdminCmd {
     companion object {
@@ -14,6 +16,8 @@ class AdminCmd {
             addSubCommand(forceStartReset(), "forcestartreset")
             addSubCommand(cancelReset(), "cancelreset")
             addSubCommand(addResetWorld(), "addresetworld")
+            addSubCommand(removeResetWorld(), "removeresetworld")
+            addSubCommand(setDisplayName(), "setdisplayname")
             addSubCommand(listResetWorld(), "listresetworld")
 
             action {
@@ -98,13 +102,12 @@ class AdminCmd {
             description("Add reset world")
 
             action {
-                val id = args[0]
-                val worldName = args[1]
-                val resetInterval = convertHumanReadableTimeToMinutes(args[2])
-                val worldDisplayName = args[3]
+                val worldName = args[0]
+                val resetInterval = convertHumanReadableTimeToMinutes(args[1])
+                val borderSize = args[2].toDoubleOrNull() ?: 0.0
 
-                if (id.isEmpty() || worldName.isEmpty() || resetInterval == 0 || worldDisplayName.isEmpty()) {
-                    sender.send("§cSử dụng: /yukiresetter addresetworld <id> <tên thế giới> <thời gian reset> <tên hiển thị>")
+                if (worldName.isEmpty() || resetInterval == 0) {
+                    sender.send("§cSử dụng: /yukiresetter addresetworld <tên thế giới> <thời gian reset> <kích thước biên giới>")
                     return@action
                 }
 
@@ -118,31 +121,94 @@ class AdminCmd {
                     return@action
                 }
 
-                if (ResetManager.getResetScheduleById(id) != null) {
-                    sender.send("§cID $id đã tồn tại")
-                    return@action
-                }
-
                 val scheduleByWorld = ResetManager.getResetScheduleByWorldName(worldName)
                 if (scheduleByWorld != null && scheduleByWorld.serverId == YukiResetter.instance.config.serverId) {
                     sender.send("§cThế giới $worldName đã tồn tại trong danh sách reset")
                     return@action
                 }
 
-                YukiResetter.instance.config.config.set("world_resets.$worldName.reset_interval", resetInterval)
-                YukiResetter.instance.config.config.set("world_resets.$worldName.world_display_name", worldDisplayName)
-                YukiResetter.instance.config.config.set("world_resets.$worldName.world_name", worldName)
-                YukiResetter.instance.config.save()
+                val schedule = WorldReset(
+                    id = UUID.randomUUID().toString(),
+                    serverId = YukiResetter.instance.config.serverId,
+                    worldDisplayName = worldName,
+                    worldName = worldName,
+                    worldBorderSize = borderSize,
+                    resetInterval = resetInterval.toLong(),
+                    lastReset = 0,
+                    nextReset = System.currentTimeMillis() + (resetInterval * 1000 * 60)
+                )
+
+                ResetManager.setResetSchedule(schedule)
+
                 sender.send("§aĐã thêm thế giới $worldName vào danh sách reset")
             }
 
             tabComplete {
                 when (args.size) {
-                    1 -> listOf("id")
-                    2 -> Bukkit.getWorlds().map { it.name }
-                    3 -> listOf("1d", "1w", "1m", "1y")
-                    4 -> listOf("Thế giới 1", "Thế giới 2", "Thế giới 3")
+                    1 -> Bukkit.getWorlds().map { it.name }
+                    2 -> listOf("1d", "1w", "1m", "1y")
+                    3 -> listOf("0", "1000", "2000", "3000", "4000", "5000")
                     else -> emptyList()
+                }
+            }
+        }
+
+        private fun removeResetWorld() = command {
+            description("Remove reset world")
+
+            action {
+                if (args.size != 1) {
+                    sender.send("§cSử dụng: /yukiresetter removeresetworld <tên thế giới>")
+                    return@action
+                }
+                val worldName = args[0]
+                val schedule = ResetManager.getResetScheduleByWorldName(worldName)
+                if (schedule == null) {
+                    sender.send("§cKhông tìm thấy thế giới $worldName trong danh sách reset")
+                    return@action
+                }
+                ResetManager.deleteResetSchedule(schedule.id)
+                sender.send("§aĐã xóa thế giới $worldName khỏi danh sách reset")
+            }
+
+            tabComplete {
+                if (args.size == 1) {
+                    ResetManager.getAllResetSchedules()
+                        .filter { it.serverId == YukiResetter.instance.config.serverId }
+                        .map { it.worldName }
+                } else {
+                    emptyList()
+                }
+            }
+        }
+
+        private fun setDisplayName() = command {
+            description("Set display name for reset world")
+
+            action {
+                if (args.size != 2) {
+                    sender.send("§cSử dụng: /yukiresetter setdisplayname <tên thế giới> <tên hiển thị>")
+                    return@action
+                }
+                val worldName = args[0]
+                val displayName = args.toList().drop(1).joinToString(" ")
+                val schedule = ResetManager.getResetScheduleByWorldName(worldName)
+                if (schedule == null) {
+                    sender.send("§cKhông tìm thấy thế giới $worldName trong danh sách reset")
+                    return@action
+                }
+                schedule.worldDisplayName = displayName
+                ResetManager.setResetSchedule(schedule)
+                sender.send("§aĐã đặt tên hiển thị cho thế giới $worldName")
+            }
+
+            tabComplete {
+                if (args.size == 1) {
+                    ResetManager.getAllResetSchedules()
+                        .filter { it.serverId == YukiResetter.instance.config.serverId }
+                        .map { it.worldName }
+                } else {
+                    emptyList()
                 }
             }
         }
@@ -159,7 +225,7 @@ class AdminCmd {
 
                 sender.send("§aDanh sách thế giới reset:")
                 list.forEach {
-                    sender.send("§a- ${it.worldDisplayName}§r (${it.worldName}) - ${it.resetInterval} phút")
+                    sender.sendMessage("§a- ${it.worldDisplayName}§r (${it.worldName}) - ${it.resetInterval} phút")
                 }
             }
         }

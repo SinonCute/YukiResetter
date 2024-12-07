@@ -1,7 +1,7 @@
 package net.minevn.yukiresetter
 
 import net.minevn.yukiresetter.manager.ResetManager
-import net.minevn.yukiresetter.`object`.ResetSchedule
+import net.minevn.yukiresetter.`object`.WorldReset
 import net.minevn.yukiresetter.utils.resetWorld
 import net.minevn.yukiresetter.utils.send
 import net.minevn.yukiresetter.utils.sendServerMessages
@@ -13,7 +13,7 @@ import kotlin.math.ceil
 
 class ResetTask(
     private val plugin: YukiResetter,
-    val schedule: ResetSchedule,
+    private val schedule: WorldReset,
     force: Boolean = false
 ) : BukkitRunnable() {
 
