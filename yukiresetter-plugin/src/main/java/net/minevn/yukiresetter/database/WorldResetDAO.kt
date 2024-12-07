@@ -54,9 +54,6 @@ abstract class WorldResetDAO : DataAccess() {
     }
 
     fun setSchedule(schedule: WorldReset): Boolean {
-        println("Setting schedule for world: ${schedule.worldName}")
-
-        // Check if the table exists
         if (!isTableExists()) {
             println("Table does not exist. Aborting schedule update.")
             return false
@@ -74,11 +71,10 @@ abstract class WorldResetDAO : DataAccess() {
                 setLong(8, schedule.nextReset)
                 executeUpdate()
             }
-            println("Schedule set result: ${rowsUpdated > 0}")
-            rowsUpdated > 0 // Return true if at least one row was updated/inserted
+            rowsUpdated > 0
         } catch (e: Exception) {
             println("Error setting schedule: ${e.message}")
-            false // Return false on error
+            false
         }
     }
 

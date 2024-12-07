@@ -48,10 +48,8 @@ object ResetManager {
     fun getResetScheduleByWorldName(worldName: String) = schedules.find { it.worldName == worldName }
 
     fun setResetSchedule(schedule: WorldReset) {
-        println("Saving schedule")
         println(database.setSchedule(schedule))
         schedules = database.getAllSchedules()
-        println("Saved schedule")
     }
 
     fun deleteResetSchedule(id: String) {

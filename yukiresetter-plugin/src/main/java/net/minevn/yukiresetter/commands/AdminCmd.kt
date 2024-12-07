@@ -1,5 +1,6 @@
 package net.minevn.yukiresetter.commands
 
+import net.minevn.libs.bukkit.color
 import net.minevn.libs.bukkit.command
 import net.minevn.yukiresetter.YukiResetter
 import net.minevn.yukiresetter.manager.ResetManager
@@ -186,7 +187,7 @@ class AdminCmd {
             description("Set display name for reset world")
 
             action {
-                if (args.size != 2) {
+                if (args.size < 2) {
                     sender.send("§cSử dụng: /yukiresetter setdisplayname <tên thế giới> <tên hiển thị>")
                     return@action
                 }
@@ -197,7 +198,7 @@ class AdminCmd {
                     sender.send("§cKhông tìm thấy thế giới $worldName trong danh sách reset")
                     return@action
                 }
-                schedule.worldDisplayName = displayName
+                schedule.worldDisplayName = displayName.color()
                 ResetManager.setResetSchedule(schedule)
                 sender.send("§aĐã đặt tên hiển thị cho thế giới $worldName")
             }
