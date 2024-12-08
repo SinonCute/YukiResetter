@@ -45,7 +45,7 @@ object ResetManager {
 
     fun getResetScheduleById(id: String) = schedules.find { it.id == id }
 
-    fun getResetScheduleByWorldName(worldName: String) = schedules.find { it.worldName == worldName }
+    fun getResetScheduleByWorldName(worldName: String) = schedules.find { it.worldName == worldName && it.serverId == plugin.config.serverId }
 
     fun setResetSchedule(schedule: WorldReset) {
         println(database.setSchedule(schedule))
